@@ -3,10 +3,20 @@ package main
 import (
 	"log"
 	"net/http"
+	"regexp"
+	"strings"
 	"text/template"
 
 	"github.com/gorilla/mux"
 )
+
+type Message struct {
+	Name    string
+	Email   string
+	Subject string
+	Content string
+	Errors  map[string]string
+}
 
 func main() {
 	r := mux.NewRouter()
@@ -31,4 +41,24 @@ func render(w http.ResponseWriter, filename string, data interface{}) {
 	if err := tmpl.Execute(w, data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+}
+
+func (msg *Message) Validate() bool {
+	msg.Errors = make(map[string]string)
+
+	re := regexp.MustCompile(".+@.+\\..+")
+	matched := re.Match([]byte(msg.Email))
+	if !matched {
+		msg.Errors["Email"] = "Invalid email"
+	}
+
+	if strings.TrimSpace(msg.Content) == "" {
+		msg.Errors["Name"] = "Please input a name"
+	}
+
+	if strings.TrimSpace(msg.Content) == "" {
+		msg.Errors["Content"] = "Please input a message"
+	}
+
+	return len(msg.Errors) == 0
 }
