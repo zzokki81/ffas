@@ -47,7 +47,7 @@ func main() {
 	r.HandleFunc("/", send).Methods("POST")
 
 	log.Println("Listening at port 8080....")
-	http.ListenAndServe(":8080", r)
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
 func contact(w http.ResponseWriter, r *http.Request) {
